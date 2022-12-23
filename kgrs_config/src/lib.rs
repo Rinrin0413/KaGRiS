@@ -8,13 +8,82 @@ use std::fs::{File, OpenOptions};
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     /// Version of the config
-    version: String,
+    version: ConfVer,
     /// Whether to use Vertical Sync
     pub vsync: bool,
     /// Opacity percentage of the grid (0-100)
     pub grid_opacity: u8,
     /// Volume percentage of the music (0-100)
     pub music_volume: f32,
+    /// Window mode
+    pub window_mode: WindowModeForConf,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum ConfVer {
+    Invalid,
+    #[serde(rename = "v0.1.0")]
+    V0_1_0,
+}
+
+impl ConfVer {
+    /// Get the `ConfVer` from a string.
+    #[allow(clippy::should_implement_trait)]
+    pub fn from_str(s: &str) -> Self {
+        match s {
+            "v0.1.0" => ConfVer::V0_1_0,
+            _ => {
+                error!(
+                    "Unknown config version: {}\nThis client version is `{}` so config file will be initialized.", 
+                    s,
+                    Self::current_version()
+                );
+                Self::Invalid
+            }
+        }
+    }
+
+    /// Get the current version of the config.
+    pub fn current_version() -> Self {
+        Self::from_str(env!("CARGO_PKG_VERSION"))
+    }
+}
+
+impl std::fmt::Display for ConfVer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ConfVer::V0_1_0 => write!(f, "v0.1.0"),
+            _ => write!(f, "Invalid"),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum WindowModeForConf {
+    Windowed,
+    Fullscreen,
+    BorderlessFullscreen,
+    SizedFullscreen,
+}
+
+impl WindowModeForConf {
+    pub fn from_window_mode(window_mode: WindowMode) -> Self {
+        match window_mode {
+            WindowMode::Windowed => WindowModeForConf::Windowed,
+            WindowMode::Fullscreen => WindowModeForConf::Fullscreen,
+            WindowMode::BorderlessFullscreen => WindowModeForConf::BorderlessFullscreen,
+            WindowMode::SizedFullscreen => WindowModeForConf::SizedFullscreen,
+        }
+    }
+
+    pub fn to_window_mode(&self) -> WindowMode {
+        match self {
+            WindowModeForConf::Windowed => WindowMode::Windowed,
+            WindowModeForConf::Fullscreen => WindowMode::Fullscreen,
+            WindowModeForConf::BorderlessFullscreen => WindowMode::BorderlessFullscreen,
+            WindowModeForConf::SizedFullscreen => WindowMode::SizedFullscreen,
+        }
+    }
 }
 
 impl Config {
@@ -63,10 +132,11 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            version: env!("CARGO_PKG_VERSION").to_string(),
+            version: ConfVer::from_str(env!("CARGO_PKG_VERSION")),
             vsync: true,
             grid_opacity: 5,
             music_volume: 50.,
+            window_mode: WindowModeForConf::Windowed,
         }
     }
 }

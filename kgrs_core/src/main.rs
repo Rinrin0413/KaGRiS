@@ -27,12 +27,14 @@ fn main() {
                 } else {
                     PresentMode::AutoNoVsync
                 },
+                mode: config.window_mode.to_window_mode(),
                 ..default()
             },
             ..default()
         }))
         .add_plugin(EguiPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
+        .add_plugin(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_startup_system(setup)
         .add_startup_system(setup_camera)
         .add_startup_system(setup_music)
@@ -45,7 +47,7 @@ fn main() {
 }
 
 /// Main setup function
-fn setup(mut _commands: Commands) {
+fn setup(mut cmds: Commands) {
     let title = format!(
         "{}{}{}{}{}{}",
         "K".red(),
@@ -59,6 +61,8 @@ fn setup(mut _commands: Commands) {
     let version = format!("v{}", env!("CARGO_PKG_VERSION")).white();
     let t_v = format!("| {} {} |", title, version).on_black();
     info!("{t_v}");
+
+    cmds.spawn(DebugUi::init());
 }
 
 fn setup_camera(mut commands: Commands) {
