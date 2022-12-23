@@ -65,7 +65,7 @@ fn setup(mut cmds: Commands) {
     cmds.spawn(DebugUi::init());
 }
 
-fn setup_camera(mut commands: Commands) {
+fn setup_camera(mut cmds: Commands) {
     info!("Setting up camera");
-    commands.spawn(Camera2dBundle::default());
+    cmds.spawn(Camera2dBundle::default());
 }
