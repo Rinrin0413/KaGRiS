@@ -1,0 +1,22 @@
+[workspace]
+members = [
+    # Binary crate
+    "kgrs_core",
+
+    # Libraries
+    "kgrs_audio",
+    "kgrs_config",
+    "kgrs_const",
+    "kgrs_game",
+    "kgrs_ui",
+]
+# For wgpu/Bevy
+resolver = "2"
+
+[workspace.package]
+description = "Just a stacking game."
+authors = ["Rinrin.rs <rinrin0413.valley@gmail.com>"]
+license-file = "LICENSE"
+repository = "https://github.com/Rinrin0413/KaGRiS.git"
+readme = "README"
+edition = "2021"

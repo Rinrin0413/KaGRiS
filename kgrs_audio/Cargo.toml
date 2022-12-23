@@ -1,0 +1,13 @@
+[package]
+name = "kgrs_audio"
+description = "Audio logics for KaGRiS"
+version = "0.1.0"
+authors.workspace = true
+license-file.workspace = true
+repository = "https://github.com/Rinrin0413/KaGRiS/kgrs_audio/"
+readme.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy = "0.9"
+kgrs_config = { path = "../kgrs_config" }
