@@ -63,6 +63,11 @@ pub fn setup_board(
                     if board_len / 2. <= p {
                         p = (p - board_len / 2.) * -1.;
                     }
+                    let offset = if is_horiz {
+                        Vec2::new(0., p)
+                    } else {
+                        Vec2::new(p, 0.)
+                    };
                     b.spawn((
                         MaterialMesh2dBundle {
                             mesh: meshes
@@ -74,11 +79,9 @@ pub fn setup_board(
                                 GRID_COL.b(),
                                 opac as f32 / 100.,
                             ))),
-                            transform: if is_horiz {
-                                Transform::from_xyz(0., p, 0.1)
-                            } else {
-                                Transform::from_xyz(p, 0., 0.1)
-                            },
+                            transform: Transform::from_xyz(
+                                offset.x, offset.y, 0.1, // Layer
+                            ),
                             ..default()
                         },
                         Grid {
@@ -91,6 +94,37 @@ pub fn setup_board(
 
             draw_grid(true);
             draw_grid(false);
+
+            // Frame
+            for (offset, is_horiz) in vec![
+                (board_height / 2., true), // Top
+                (-board_height / 2., true), // Bottom
+                (board_width / 2., false), // Right
+                (-board_width / 2., false), // Left
+            ] {
+                // Corners will be broken so added thickness to frame length.
+                let (size, offset) = if is_horiz {
+                    (
+                        Vec2::new(board_width + FRAME_THICKNESS, FRAME_THICKNESS),
+                        Vec2::new(0., offset),
+                    )
+                } else {
+                    (
+                        Vec2::new(FRAME_THICKNESS, board_height + FRAME_THICKNESS),
+                        Vec2::new(offset, 0.),
+                    )
+                };
+                b.spawn((MaterialMesh2dBundle {
+                    mesh: meshes
+                        .add(Mesh::from(shape::Quad { size, ..default() }))
+                        .into(),
+                    material: materials.add(ColorMaterial::from(FRAME_COL)),
+                    transform: Transform::from_xyz(
+                        offset.x, offset.y, 0.2, // Layer
+                    ),
+                    ..default()
+                },));
+            }
         }
     });
 }

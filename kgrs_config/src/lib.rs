@@ -133,7 +133,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             version: ConfVer::from_str(env!("CARGO_PKG_VERSION")),
-            vsync: true,
+            vsync: false,
             grid_opacity: 5,
             music_volume: 50.,
             window_mode: WindowModeForConf::Windowed,
