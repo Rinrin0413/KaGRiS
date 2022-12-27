@@ -31,22 +31,21 @@ pub fn setup_board(
     let window_height = windows.get_primary().unwrap().height();
     let board_width = window_height * BOARD_WIDTH_RATIO;
     let board_height = window_height * BOARD_HEIGHT_RATIO;
-    cmds.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes
-                .add(Mesh::from(shape::Quad {
-                    size: Vec2::new(board_width, board_height),
-                    ..default()
-                }))
-                .into(),
-            material: materials.add(ColorMaterial::from(Color::BLACK)),
-            ..default()
-        },
-        Board {
-            width: board_width,
-            height: board_height,
-        },
-    ))
+
+    cmds.spawn(MaterialMesh2dBundle {
+        mesh: meshes
+            .add(Mesh::from(shape::Quad {
+                size: Vec2::new(board_width, board_height),
+                ..default()
+            }))
+            .into(),
+        material: materials.add(ColorMaterial::from(Color::BLACK)),
+        ..default()
+    })
+    .insert(Board {
+        width: board_width,
+        height: board_height,
+    })
     // Grids
     .with_children(|b| {
         let opac = Config::load().grid_opacity;
@@ -68,27 +67,23 @@ pub fn setup_board(
                     } else {
                         Vec2::new(p, 0.)
                     };
-                    b.spawn((
-                        MaterialMesh2dBundle {
-                            mesh: meshes
-                                .add(Mesh::from(shape::Quad { size, ..default() }))
-                                .into(),
-                            material: materials.add(ColorMaterial::from(Color::rgba(
-                                GRID_COL.r(),
-                                GRID_COL.g(),
-                                GRID_COL.b(),
-                                opac as f32 / 100.,
-                            ))),
-                            transform: Transform::from_xyz(
-                                offset.x, offset.y, 0.1, // Layer
-                            ),
-                            ..default()
-                        },
-                        Grid {
-                            position: p,
-                            is_horizontal: is_horiz,
-                        },
-                    ));
+                    b.spawn(MaterialMesh2dBundle {
+                        mesh: meshes
+                            .add(Mesh::from(shape::Quad { size, ..default() }))
+                            .into(),
+                        material: materials.add(ColorMaterial::from(Color::rgba(
+                            GRID_COL.r(),
+                            GRID_COL.g(),
+                            GRID_COL.b(),
+                            opac as f32 / 100.,
+                        ))),
+                        transform: Transform::from_xyz(offset.x, offset.y, 0.1),
+                        ..default()
+                    })
+                    .insert(Grid {
+                        position: p,
+                        is_horizontal: is_horiz,
+                    });
                 }
             };
 
@@ -96,21 +91,25 @@ pub fn setup_board(
             draw_grid(false);
 
             // Frame
-            for (offset, is_horiz) in vec![
-                (board_height / 2., true), // Top
-                (-board_height / 2., true), // Bottom
-                (board_width / 2., false), // Right
-                (-board_width / 2., false), // Left
+
+            let half_frame_thick = FRAME_THICKNESS / 2.;
+            let double_frame_thick = FRAME_THICKNESS * 2.;
+
+            for (offset, is_horiz) in [
+                //(board_height / 2. +half_frame_thick, true),  // Top
+                (-board_height / 2. - half_frame_thick, true), // Bottom
+                (board_width / 2. + half_frame_thick, false),  // Right
+                (-board_width / 2. - half_frame_thick, false), // Left
             ] {
                 // Corners will be broken so added thickness to frame length.
                 let (size, offset) = if is_horiz {
                     (
-                        Vec2::new(board_width + FRAME_THICKNESS, FRAME_THICKNESS),
+                        Vec2::new(board_width + double_frame_thick, FRAME_THICKNESS),
                         Vec2::new(0., offset),
                     )
                 } else {
                     (
-                        Vec2::new(FRAME_THICKNESS, board_height + FRAME_THICKNESS),
+                        Vec2::new(FRAME_THICKNESS, board_height + double_frame_thick),
                         Vec2::new(offset, 0.),
                     )
                 };
@@ -119,9 +118,7 @@ pub fn setup_board(
                         .add(Mesh::from(shape::Quad { size, ..default() }))
                         .into(),
                     material: materials.add(ColorMaterial::from(FRAME_COL)),
-                    transform: Transform::from_xyz(
-                        offset.x, offset.y, 0.2, // Layer
-                    ),
+                    transform: Transform::from_xyz(offset.x, offset.y, 0.2),
                     ..default()
                 },));
             }

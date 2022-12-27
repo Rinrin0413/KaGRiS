@@ -12,3 +12,5 @@ edition.workspace = true
 bevy = "0.9"
 kgrs_config = {path = "../kgrs_config"}
 kgrs_const = {path = "../kgrs_const"}
+kgrs_util = {path = "../kgrs_util"}
+rand = "0.8.5"

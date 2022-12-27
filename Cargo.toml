@@ -9,6 +9,7 @@ members = [
     "kgrs_const",
     "kgrs_game",
     "kgrs_ui",
+    "kgrs_util",
 ]
 # For wgpu/Bevy
 resolver = "2"

@@ -1,0 +1,11 @@
+[package]
+name = "kgrs_util"
+description = "Utilities for KaGRiS"
+version = "0.1.0"
+authors.workspace = true
+license-file.workspace = true
+repository = "https://github.com/Rinrin0413/KaGRiS/kgrs_util/"
+readme.workspace = true
+edition.workspace = true
+
+[dependencies]

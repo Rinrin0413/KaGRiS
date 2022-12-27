@@ -1,6 +1,5 @@
 use bevy::{
     diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
-    input::{keyboard::KeyboardInput, ButtonState},
     prelude::*,
     window::PresentMode,
 };
@@ -114,14 +113,10 @@ pub fn debug_ui(
         });
 }
 
-pub fn toggle_debug_ui(mut input: EventReader<KeyboardInput>, mut query: Query<&mut DebugUi>) {
-    for r#in in input.iter() {
-        if let Some(key) = r#in.key_code {
-            if key == KeyCode::F3 && r#in.state == ButtonState::Pressed {
-                for mut debug_ui in query.iter_mut() {
-                    debug_ui.open = !debug_ui.open;
-                }
-            }
+pub fn toggle_debug_ui(input: Res<Input<KeyCode>>, mut query: Query<&mut DebugUi>) {
+    if input.just_pressed(KeyCode::F3) {
+        for mut debug_ui in query.iter_mut() {
+            debug_ui.open = !debug_ui.open;
         }
     }
 }

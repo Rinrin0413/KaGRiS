@@ -1,5 +1,5 @@
 use bevy::{
-    diagnostic::FrameTimeDiagnosticsPlugin,
+    diagnostic::{EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     prelude::*,
     window::{PresentMode, WindowResizeConstraints},
 };
@@ -8,7 +8,7 @@ use colored::Colorize;
 use kgrs_audio::music::*;
 use kgrs_config::Config;
 use kgrs_const::color::*;
-use kgrs_game::board::*;
+use kgrs_game::{board::*, mino::MinoPlugin};
 use kgrs_ui::debug::*;
 
 fn main() {
@@ -34,7 +34,8 @@ fn main() {
         }))
         .add_plugin(EguiPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
-        .add_plugin(bevy::diagnostic::EntityCountDiagnosticsPlugin)
+        .add_plugin(EntityCountDiagnosticsPlugin)
+        .add_plugin(MinoPlugin)
         .add_startup_system(setup)
         .add_startup_system(setup_camera)
         .add_startup_system(setup_music)
