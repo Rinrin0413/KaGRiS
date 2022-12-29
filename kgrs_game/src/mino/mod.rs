@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle, window::WindowResized};
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle, time::FixedTimestep, window::WindowResized};
 use kgrs_const::{color::mino_color, dimension::*};
 use mino_ctrl::*;
 use rand::{thread_rng, Rng};
@@ -10,7 +10,11 @@ pub struct MinoPlugin;
 impl Plugin for MinoPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(set_mino_ctrl)
-            .add_system(spawn_mino)
+            .add_system_set(
+                SystemSet::new()
+                    .with_run_criteria(FixedTimestep::step(0.25))
+                    .with_system(spawn_mino),
+            )
             .add_system(resize_minoes);
     }
 }
@@ -48,7 +52,7 @@ fn spawn_mino(
 }
 
 /// Resizes and repositions the minoes when the window is resized.
-pub fn resize_minoes(
+pub(crate) fn resize_minoes(
     mut resize_reader: EventReader<WindowResized>,
     mut query: Query<(&mut Mino, &mut Transform)>,
 ) {

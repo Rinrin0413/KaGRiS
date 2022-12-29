@@ -8,8 +8,8 @@ use colored::Colorize;
 use kgrs_audio::music::*;
 use kgrs_config::Config;
 use kgrs_const::color::*;
-use kgrs_game::{board::*, mino::MinoPlugin};
-use kgrs_ui::debug::*;
+use kgrs_game::{board::BoardPlugin, mino::MinoPlugin};
+use kgrs_ui::debug::DebugUiPlugin;
 
 fn main() {
     let config = Config::load();
@@ -35,20 +35,18 @@ fn main() {
         .add_plugin(EguiPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_plugin(EntityCountDiagnosticsPlugin)
+        .add_plugin(DebugUiPlugin)
+        .add_plugin(BoardPlugin)
         .add_plugin(MinoPlugin)
         .add_startup_system(setup)
         .add_startup_system(setup_camera)
         .add_startup_system(setup_music)
-        .add_startup_system(setup_board)
         .insert_resource(ClearColor(BG_COL))
-        .add_system(resize_board)
-        .add_system(debug_ui)
-        .add_system(toggle_debug_ui)
         .run();
 }
 
 /// Main setup function
-fn setup(mut cmds: Commands) {
+fn setup(mut _cmds: Commands) {
     let title = format!(
         "{}{}{}{}{}{}",
         "K".red(),
@@ -62,8 +60,6 @@ fn setup(mut cmds: Commands) {
     let version = format!("v{}", env!("CARGO_PKG_VERSION")).white();
     let t_v = format!("| {} {} |", title, version).on_black();
     info!("{t_v}");
-
-    cmds.spawn(DebugUi::init());
 }
 
 fn setup_camera(mut cmds: Commands) {

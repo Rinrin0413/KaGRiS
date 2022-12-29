@@ -6,20 +6,34 @@ use bevy::{
 use bevy_egui::{egui, EguiContext};
 use kgrs_config::{Config, WindowModeForConf};
 
+pub struct DebugUiPlugin;
+
+impl Plugin for DebugUiPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(startup_debug_ui)
+            .add_system(debug_ui)
+            .add_system(toggle_debug_ui);
+    }
+}
+
+fn startup_debug_ui(mut cmds: Commands) {
+    cmds.spawn(DebugUi::init());
+}
+
 /// Debug UI component
 #[derive(Component)]
-pub struct DebugUi {
+struct DebugUi {
     /// Whether the debug window is open
-    pub open: bool,
+    open: bool,
 }
 
 impl DebugUi {
-    pub fn init() -> Self {
+    fn init() -> Self {
         Self { open: false }
     }
 }
 
-pub fn debug_ui(
+fn debug_ui(
     mut egui_ctx: ResMut<EguiContext>,
     diags: Res<Diagnostics>,
     mut windows: ResMut<Windows>,
@@ -113,7 +127,7 @@ pub fn debug_ui(
         });
 }
 
-pub fn toggle_debug_ui(input: Res<Input<KeyCode>>, mut query: Query<&mut DebugUi>) {
+fn toggle_debug_ui(input: Res<Input<KeyCode>>, mut query: Query<&mut DebugUi>) {
     if input.just_pressed(KeyCode::F3) {
         for mut debug_ui in query.iter_mut() {
             debug_ui.open = !debug_ui.open;

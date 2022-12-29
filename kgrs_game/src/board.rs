@@ -2,26 +2,29 @@ use bevy::{prelude::*, sprite::MaterialMesh2dBundle, window::WindowResized};
 use kgrs_config::Config;
 use kgrs_const::{color::*, dimension::*};
 
+pub struct BoardPlugin;
+
+impl Plugin for BoardPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(setup_board).add_system(resize_board);
+    }
+}
+
 /// The board
 #[derive(Component)]
 pub struct Board {
     /// Relative width from the initial size.
-    pub width: f32,
+    width: f32,
     /// Relative height from the initial size.
-    pub height: f32,
+    height: f32,
 }
 
 /// The grid of the board
 #[derive(Component)]
-pub struct Grid {
-    /// Relative position from zero.
-    pub position: f32,
-    /// Whether the grid is horizontal.
-    pub is_horizontal: bool,
-}
+struct Grid;
 
 /// Setups the board
-pub fn setup_board(
+fn setup_board(
     mut cmds: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -80,10 +83,7 @@ pub fn setup_board(
                         transform: Transform::from_xyz(offset.x, offset.y, 0.1),
                         ..default()
                     })
-                    .insert(Grid {
-                        position: p,
-                        is_horizontal: is_horiz,
-                    });
+                    .insert(Grid);
                 }
             };
 
@@ -127,7 +127,7 @@ pub fn setup_board(
 }
 
 /// Resizes the board when the window is resized.
-pub fn resize_board(
+fn resize_board(
     mut resize_reader: EventReader<WindowResized>,
     mut query: Query<(&Board, &mut Transform)>,
 ) {
