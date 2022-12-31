@@ -1,4 +1,6 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle, time::FixedTimestep, window::WindowResized};
+use bevy::{
+    ecs::schedule::ShouldRun, prelude::*, sprite::MaterialMesh2dBundle, window::WindowResized,
+};
 use kgrs_const::{color::mino_color, dimension::*};
 use mino_ctrl::*;
 use rand::{thread_rng, Rng};
@@ -12,10 +14,21 @@ impl Plugin for MinoPlugin {
         app.add_startup_system(set_mino_ctrl)
             .add_system_set(
                 SystemSet::new()
-                    .with_run_criteria(FixedTimestep::step(0.25))
+                    .with_run_criteria(is_waiting_mino)
                     .with_system(spawn_mino),
             )
-            .add_system(resize_minoes);
+            .add_system(resize_minoes)
+            .add_system(place_mino);
+    }
+}
+
+fn is_waiting_mino(
+    mut mino_ctrl_query: Query<&MinoControl>,
+) -> ShouldRun {
+    if mino_ctrl_query.single_mut().is_waiting {
+        ShouldRun::Yes
+    } else {
+        ShouldRun::No
     }
 }
 
@@ -34,7 +47,6 @@ fn spawn_mino(
     let pos = Vec2::new(-board_width / 2. + half_cell, board_height / 2. - half_cell);
 
     let mut mino_ctrl = mino_ctrl_query.single_mut();
-    mino_ctrl.nth += 1;
     let mino_kind = rand_mino(mino_ctrl.nth, mino_ctrl.seed);
 
     cmds.spawn(MaterialMesh2dBundle {
@@ -49,6 +61,8 @@ fn spawn_mino(
         ..default()
     })
     .insert(Mino::spawn(mino_kind, one_cell, pos));
+    mino_ctrl.nth += 1;
+    mino_ctrl.is_waiting = false;
 }
 
 /// Resizes and repositions the minoes when the window is resized.
@@ -230,6 +244,8 @@ mod mino_ctrl {
         pub(crate) nth: usize,
         /// Seed for RNG.
         pub(crate) seed: u64,
+        /// Whether waiting for the next mino.
+        pub(crate) is_waiting: bool,
     }
 
     impl MinoControl {
@@ -237,12 +253,22 @@ mod mino_ctrl {
             Self {
                 nth: 0,
                 seed: thread_rng().gen_range(0..1000000000),
+                is_waiting: true,
             }
         }
     }
 
     pub(crate) fn set_mino_ctrl(mut cmds: Commands) {
         cmds.spawn(MinoControl::init());
+    }
+
+    pub(crate) fn place_mino(
+        mut mino_ctrl_query: Query<&mut MinoControl>,
+        input: Res<Input<KeyCode>>
+    ) {
+        if input.just_pressed(KeyCode::Space) {
+            mino_ctrl_query.single_mut().is_waiting = true;
+        }
     }
 }
 
