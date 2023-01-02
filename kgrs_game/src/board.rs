@@ -6,17 +6,17 @@ pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_board).add_system(resize_board);
+        app.add_startup_system(setup_board).add_system(adjust_board);
     }
 }
 
 /// The board
 #[derive(Component)]
-pub struct Board {
-    /// Relative width from the initial size.
-    width: f32,
-    /// Relative height from the initial size.
-    height: f32,
+pub(crate) struct Board {
+    /// Initial width of the board.
+    pub(crate) width: f32,
+    /// Initial height of the board.
+    pub(crate) height: f32,
 }
 
 /// The grid of the board
@@ -50,7 +50,7 @@ fn setup_board(
         height: board_height,
     })
     // Grids
-    .with_children(|b| {
+    .with_children(|c| {
         let opac = Config::load().grid_opacity;
         if 0 < opac {
             let mut draw_grid = |is_horiz: bool| {
@@ -70,7 +70,7 @@ fn setup_board(
                     } else {
                         Vec2::new(p, 0.)
                     };
-                    b.spawn(MaterialMesh2dBundle {
+                    c.spawn(MaterialMesh2dBundle {
                         mesh: meshes
                             .add(Mesh::from(shape::Quad { size, ..default() }))
                             .into(),
@@ -113,7 +113,7 @@ fn setup_board(
                         Vec2::new(offset, 0.),
                     )
                 };
-                b.spawn((MaterialMesh2dBundle {
+                c.spawn((MaterialMesh2dBundle {
                     mesh: meshes
                         .add(Mesh::from(shape::Quad { size, ..default() }))
                         .into(),
@@ -126,8 +126,8 @@ fn setup_board(
     });
 }
 
-/// Resizes the board when the window is resized.
-fn resize_board(
+/// Resizes and repositions the board when the window is resized.
+fn adjust_board(
     mut resize_reader: EventReader<WindowResized>,
     mut query: Query<(&Board, &mut Transform)>,
 ) {
@@ -138,7 +138,16 @@ fn resize_board(
                 window.height * BOARD_HEIGHT_RATIO / board.height,
                 1.0,
             );
-            // `Transform.scale` is relative size so don't update `board.width` and `board.height`.
+            // `Transform.scale` is relative ratio from the initial size
+            // so don't update `board.width` and `board.height`.
+
+            // It is: initial_height * relative_ratio = current_true_height
+            let true_board_height = board.height * tf.scale[1];
+            // Position the board bottom at the window bottom.
+            let pos_bottom = -(window.height - true_board_height) / 2. + GRID_THICKNESS * 2.;
+            // Offset based on `BOARD_OFFSET_RATIO_Y`.
+            let offset = window.height * BOARD_OFFSET_RATIO_Y;
+            tf.translation[1] = pos_bottom + offset;
         }
     }
 }
