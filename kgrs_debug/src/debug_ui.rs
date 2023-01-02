@@ -5,6 +5,7 @@ use bevy::{
 };
 use bevy_egui::{egui, EguiContext};
 use kgrs_config::{Config, WindowModeForConf};
+use kgrs_util::function::fmt::wm_to_string;
 
 pub struct DebugUiPlugin;
 
@@ -133,15 +134,4 @@ fn toggle_debug_ui(input: Res<Input<KeyCode>>, mut query: Query<&mut DebugUi>) {
             debug_ui.open = !debug_ui.open;
         }
     }
-}
-
-/// Formats `WindowMode` to a string.
-fn wm_to_string(mode: WindowMode) -> String {
-    match mode {
-        WindowMode::Windowed => "Windowed",
-        WindowMode::BorderlessFullscreen => "Borderless Fullscreen",
-        WindowMode::SizedFullscreen => "Sized Fullscreen",
-        WindowMode::Fullscreen => "Fullscreen",
-    }
-    .to_string()
 }

@@ -5,6 +5,23 @@ use serde::{Deserialize, Serialize};
 use serde_json::{from_reader, to_writer};
 use std::fs::{File, OpenOptions};
 
+/// Config manager for KaGRiS
+///
+/// # Examples
+///
+/// ```
+/// use kgrs_config::Config;
+///
+/// let mut config = Config::load();
+///
+/// // Do something with the config
+///
+/// // Update the config
+/// config.vsync = true;
+///
+/// // Save the config
+/// config.save();
+/// ```
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     /// Version of the config

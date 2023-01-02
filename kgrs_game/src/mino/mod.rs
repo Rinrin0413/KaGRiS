@@ -1,7 +1,7 @@
 use crate::board::Board;
 use bevy::{ecs::schedule::ShouldRun, prelude::*, sprite::MaterialMesh2dBundle};
 use ctrl::*;
-use kgrs_const::{color::mino_color, dimension::*};
+use kgrs_const::color::mino_color;
 use rand::{thread_rng, Rng};
 use util::*;
 use IsMino::*;

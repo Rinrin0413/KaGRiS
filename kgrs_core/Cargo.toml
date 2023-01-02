@@ -12,6 +12,7 @@ edition.workspace = true
 kgrs_audio = {path = "../kgrs_audio"}
 kgrs_config = {path = "../kgrs_config"}
 kgrs_const = {path = "../kgrs_const"}
+kgrs_debug = {path = "../kgrs_debug"}
 kgrs_game = {path = "../kgrs_game"}
 kgrs_ui = {path = "../kgrs_ui"}
 bevy = "0.9"

@@ -1,0 +1,15 @@
+[package]
+name = "kgrs_debug"
+description = "Debug systems for KaGRiS"
+version = "0.1.0"
+authors.workspace = true
+license-file.workspace = true
+repository = "https://github.com/Rinrin0413/KaGRiS/kgrs_debug/"
+readme.workspace = true
+edition.workspace = true
+
+[dependencies]
+bevy = "0.9"
+bevy_egui = "0.18"
+kgrs_config = { path = "../kgrs_config" }
+kgrs_util = { path = "../kgrs_util" }

@@ -7,9 +7,9 @@ use bevy_egui::EguiPlugin;
 use colored::Colorize;
 use kgrs_audio::music::*;
 use kgrs_config::Config;
-use kgrs_const::color::*;
+use kgrs_const::color::BG_COL;
+use kgrs_debug::{debug_ui::DebugUiPlugin, toggle_fullscreen::ToggleFullscreenPlugin};
 use kgrs_game::{board::BoardPlugin, mino::MinoPlugin};
-use kgrs_ui::debug::DebugUiPlugin;
 
 fn main() {
     let config = Config::load();
@@ -36,6 +36,7 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_plugin(EntityCountDiagnosticsPlugin)
         .add_plugin(DebugUiPlugin)
+        .add_plugin(ToggleFullscreenPlugin)
         .add_plugin(BoardPlugin)
         .add_plugin(MinoPlugin)
         .add_startup_system(setup)
