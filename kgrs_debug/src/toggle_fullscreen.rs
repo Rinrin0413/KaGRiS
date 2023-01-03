@@ -14,7 +14,8 @@ fn toggle_fullscreen(input: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
     if input.just_pressed(KeyCode::F11) {
         let window = windows.primary_mut();
         let window_mode = match window.mode() {
-            WindowMode::Windowed => WindowMode::Fullscreen,
+            // TODO: optional fullscreen or borderless fullscreen for low-end
+            WindowMode::Windowed => WindowMode::BorderlessFullscreen,
             _ => WindowMode::Windowed,
         };
         info!(
