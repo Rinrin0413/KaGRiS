@@ -42,7 +42,7 @@ fn setup_board(
                 ..default()
             }))
             .into(),
-        material: materials.add(ColorMaterial::from(Color::BLACK)),
+        material: materials.add(ColorMaterial::from(BOARD_COL)),
         ..default()
     })
     .insert(Board {

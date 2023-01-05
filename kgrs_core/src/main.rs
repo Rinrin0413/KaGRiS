@@ -1,4 +1,5 @@
 use bevy::{
+    app::PluginGroupBuilder,
     diagnostic::{EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     prelude::*,
     window::{PresentMode, WindowResizeConstraints},
@@ -12,42 +13,37 @@ use kgrs_debug::{debug_ui::DebugUiPlugin, toggle_fullscreen::ToggleFullscreenPlu
 use kgrs_game::{board::BoardPlugin, mino::MinoPlugin};
 
 fn main() {
-    let config = Config::load();
-    App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
-                title: format!("KaGRiS v{}", env!("CARGO_PKG_VERSION")),
-                resize_constraints: WindowResizeConstraints {
-                    min_width: 512.,
-                    min_height: 288.,
-                    ..default()
-                },
-                present_mode: if config.vsync {
-                    PresentMode::AutoVsync
-                } else {
-                    PresentMode::AutoNoVsync
-                },
-                mode: config.window_mode.to_window_mode(),
-                ..default()
-            },
-            ..default()
-        }))
+    // The application
+    let mut app = App::new();
+
+    // Plugins
+    app.add_plugins(default_plugins())
         .add_plugin(EguiPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_plugin(EntityCountDiagnosticsPlugin)
         .add_plugin(DebugUiPlugin)
         .add_plugin(ToggleFullscreenPlugin)
         .add_plugin(BoardPlugin)
-        .add_plugin(MinoPlugin)
-        .add_startup_system(setup)
+        .add_plugin(MinoPlugin);
+
+    // Startup systems
+    app.add_startup_system_to_stage(StartupStage::PreStartup, pre_startup)
         .add_startup_system(setup_camera)
-        .add_startup_system(setup_music)
-        .insert_resource(ClearColor(BG_COL))
-        .run();
+        .add_startup_system(setup_music);
+
+    // Resources
+    app.insert_resource(ClearColor(BG_COL));
+
+    // In development
+    #[cfg(debug_assertions)]
+    app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
+
+    // Run the application.
+    app.run();
 }
 
-/// Main setup function
-fn setup(mut _cmds: Commands) {
+/// Pre-startup systems
+fn pre_startup(mut _cmds: Commands) {
     let title = format!(
         "{}{}{}{}{}{}",
         "K".red(),
@@ -60,10 +56,36 @@ fn setup(mut _cmds: Commands) {
     .bold();
     let version = format!("v{}", env!("CARGO_PKG_VERSION")).white();
     let t_v = format!("| {} {} |", title, version).on_black();
-    info!("{t_v}");
+    if cfg!(debug_assertions) {
+        info!("{t_v} {}", "[DEV-MODE]".white().bold());
+    } else {
+        info!("{t_v}");
+    }
 }
 
 fn setup_camera(mut cmds: Commands) {
     info!("Setting up camera");
     cmds.spawn(Camera2dBundle::default());
+}
+
+fn default_plugins() -> PluginGroupBuilder {
+    let config = Config::load();
+    DefaultPlugins.set(WindowPlugin {
+        window: WindowDescriptor {
+            title: format!("KaGRiS v{}", env!("CARGO_PKG_VERSION")),
+            resize_constraints: WindowResizeConstraints {
+                min_width: 512.,
+                min_height: 288.,
+                ..default()
+            },
+            present_mode: if config.vsync {
+                PresentMode::AutoVsync
+            } else {
+                PresentMode::AutoNoVsync
+            },
+            mode: config.window_mode.to_window_mode(),
+            ..default()
+        },
+        ..default()
+    })
 }

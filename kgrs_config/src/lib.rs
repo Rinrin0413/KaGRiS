@@ -151,7 +151,7 @@ impl Default for Config {
         Self {
             version: ConfVer::from_str(env!("CARGO_PKG_VERSION")),
             vsync: false,
-            grid_opacity: 5,
+            grid_opacity: 8,
             music_volume: 50.,
             window_mode: WindowModeForConf::Windowed,
         }
