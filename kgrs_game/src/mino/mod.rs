@@ -1,6 +1,7 @@
 use crate::board::Board;
 use bevy::{ecs::schedule::ShouldRun, prelude::*, sprite::MaterialMesh2dBundle};
-use ctrl::*;
+use control::MinoControlPlugin;
+use controlled::*;
 use kgrs_const::color::mino_color;
 use rand::{thread_rng, Rng};
 use util::*;
@@ -11,17 +12,17 @@ pub struct MinoPlugin;
 impl Plugin for MinoPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(set_mino_ctrl)
+            .add_plugin(MinoControlPlugin)
             .add_system_set(
                 SystemSet::new()
                     .with_run_criteria(is_waiting_mino)
                     .with_system(spawn_mino),
-            )
-            // .add_system(resize_minoes) // DEBUG: probably `resize_minoes` is useless
-            .add_system(place_mino);
+            );
+        // .add_system(resize_minoes) // DEBUG: probably `resize_minoes` is useless
     }
 }
 
-fn is_waiting_mino(mut mino_ctrl_query: Query<&MinoControl>) -> ShouldRun {
+fn is_waiting_mino(mut mino_ctrl_query: Query<&MinoCtrl>) -> ShouldRun {
     if mino_ctrl_query.single_mut().is_waiting {
         ShouldRun::Yes
     } else {
@@ -30,7 +31,7 @@ fn is_waiting_mino(mut mino_ctrl_query: Query<&MinoControl>) -> ShouldRun {
 }
 
 fn spawn_mino(
-    mut mino_ctrl_query: Query<&mut MinoControl>,
+    mut mino_ctrl_query: Query<&mut MinoCtrl>,
     mut cmds: Commands,
     board_query: Query<(Entity, &Board)>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -79,6 +80,49 @@ fn spawn_mino(
             }
         }
     }
+
+    // ↓ Hara mino
+    // let hara_shape = [
+    //     [M, M, M, M, M, M, M],
+    //     [M, E, E, E, M, E, E],
+    //     [M, E, M, M, M, M, M],
+    //     [M, E, M, E, E, E, M],
+    //     [M, E, M, M, M, M, M],
+    //     [M, E, M, E, E, E, M],
+    //     [M, E, M, M, M, M, M],
+    //     [M, E, E, E, M, E, E],
+    //     [M, E, M, E, M, E, M],
+    // ];
+    // for x in 0..7 {
+    //     for y in 0..9 {
+    //         if hara_shape[y][x] == M {
+    //             cmds.entity(board_entity).with_children(|c| {
+    //                 c.spawn(MaterialMesh2dBundle {
+    //                     mesh: meshes
+    //                         .add(Mesh::from(shape::Quad {
+    //                             size: Vec2::new(one_cell, one_cell),
+    //                             ..default()
+    //                         }))
+    //                         .into(),
+    //                     material: materials.add(ColorMaterial::from(mino_kind.color())),
+    //                     transform: Transform::from_translation(Vec3::new(
+    //                         spawn_origin.x + x as f32 * one_cell,
+    //                         spawn_origin.y - y as f32 * one_cell,
+    //                         0.15,
+    //                     )),
+    //                     ..default()
+    //                 })
+    //                 .insert(Mino::spawn(
+    //                     mino_kind,
+    //                     one_cell,
+    //                     spawn_origin,
+    //                     Vec2::new(x as f32, y as f32),
+    //                 ));
+    //             });
+    //         }
+    //     }
+    // }
+
     mino_ctrl.nth += 1;
     mino_ctrl.is_waiting = false;
 }
@@ -258,11 +302,11 @@ enum MinoState {
     Hold,
 }
 
-mod ctrl {
+mod controlled {
     use super::*;
 
     #[derive(Component)]
-    pub(crate) struct MinoControl {
+    pub(crate) struct MinoCtrl {
         /// nth of the mino (0-indexed)
         pub(crate) nth: usize,
         /// Seed for RNG.
@@ -271,7 +315,7 @@ mod ctrl {
         pub(crate) is_waiting: bool,
     }
 
-    impl MinoControl {
+    impl MinoCtrl {
         fn init() -> Self {
             Self {
                 nth: 0,
@@ -282,17 +326,9 @@ mod ctrl {
     }
 
     pub(crate) fn set_mino_ctrl(mut cmds: Commands) {
-        cmds.spawn(MinoControl::init());
-    }
-
-    pub(crate) fn place_mino(
-        mut mino_ctrl_query: Query<&mut MinoControl>,
-        input: Res<Input<KeyCode>>,
-    ) {
-        if input.just_pressed(KeyCode::Space) {
-            mino_ctrl_query.single_mut().is_waiting = true;
-        }
+        cmds.spawn(MinoCtrl::init());
     }
 }
 
+pub(crate) mod control;
 pub(crate) mod util;

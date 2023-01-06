@@ -1,7 +1,7 @@
 [workspace]
 members = [
     # Binary crate
-    "kgrs_core",
+    "kagris",
 
     # Libraries
     "kgrs_audio",
