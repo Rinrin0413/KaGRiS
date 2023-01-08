@@ -7,8 +7,8 @@ members = [
     "kgrs_audio",
     "kgrs_config",
     "kgrs_const",
+    "kgrs_core",
     "kgrs_debug",
-    "kgrs_game",
     "kgrs_ui",
     "kgrs_util",
 ]

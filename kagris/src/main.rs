@@ -9,8 +9,8 @@ use colored::Colorize;
 use kgrs_audio::music::*;
 use kgrs_config::Config;
 use kgrs_const::color::BG_COL;
+use kgrs_core::{board::BoardPlugin, mino::MinoPlugin};
 use kgrs_debug::{debug_ui::DebugUiPlugin, toggle_fullscreen::ToggleFullscreenPlugin};
-use kgrs_game::{board::BoardPlugin, mino::MinoPlugin};
 
 fn main() {
     // The application

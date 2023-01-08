@@ -1,3 +1,4 @@
+use crate::mino::MinoData;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle, window::WindowResized};
 use kgrs_config::Config;
 use kgrs_const::{color::*, dimension::*};
@@ -13,6 +14,8 @@ impl Plugin for BoardPlugin {
 /// The board
 #[derive(Component)]
 pub(crate) struct Board {
+    /// The data of the board.
+    pub(crate) data: MinoData,
     /// Initial width of the board.
     pub(crate) width: f32,
     /// Initial height of the board.
@@ -46,6 +49,7 @@ fn setup_board(
         ..default()
     })
     .insert(Board {
+        data: MinoData::empty(),
         width: board_width,
         height: board_height,
     })

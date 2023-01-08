@@ -1,7 +1,7 @@
 use super::MinoType;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 
-/// Chooses a mino with 7-bag randomizer
+/// Chooses a mino with 7-bag randomizer.
 ///
 /// # Arguments
 ///
@@ -23,6 +23,24 @@ pub(crate) fn rand_mino(nth: usize, seed: u64) -> MinoType {
     let mut rng = StdRng::seed_from_u64(seed + nth_bag as u64);
     minoes.shuffle(&mut rng);
     minoes[nth_in_bag]
+}
+
+/// The movement direction of the mino.
+pub(crate) enum MoveDirection {
+    Left,
+    Right,
+}
+
+impl MoveDirection {
+    /// Whether the direction is left.
+    pub(crate) fn is_left(&self) -> bool {
+        matches!(self, Self::Left)
+    }
+
+    /// Whether the direction is right.
+    pub(crate) fn is_right(&self) -> bool {
+        matches!(self, Self::Right)
+    }
 }
 
 #[cfg(test)]
