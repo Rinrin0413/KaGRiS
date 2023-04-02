@@ -3,7 +3,10 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_reader, to_writer};
-use std::fs::{File, OpenOptions};
+use std::{
+    fs::{File, OpenOptions},
+    num::NonZeroU8,
+};
 
 /// Config manager for KaGRiS
 ///
@@ -34,6 +37,61 @@ pub struct Config {
     pub music_volume: f32,
     /// Window mode
     pub window_mode: WindowModeForConf,
+    /// Control handlings
+    pub handling: Handling,
+}
+
+impl Config {
+    /// Load from config.json
+    pub fn load() -> Self {
+        match File::open("config.json") {
+            Ok(f) => {
+                match from_reader(f) {
+                    Ok(config) => config,
+                    Err(why) => {
+                        warn!("Failed to parse config.json: {}", why);
+                        default() // TODO: impl ask to initialize
+                    }
+                }
+            }
+            Err(why) => {
+                warn!("Failed to open config.json: {}", why);
+                default() // TODO: impl ask to initialize
+            }
+        }
+    }
+
+    /// Apply to config.json
+    pub fn save(&self) {
+        match OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open("config.json")
+        {
+            Ok(mut f) => {
+                if let Err(why) = to_writer(&mut f, self) {
+                    warn!("Failed to save config.json: {}", why);
+                }
+            }
+            Err(why) => {
+                warn!("Failed to open config.json: {}", why)
+                // TODO: impl ask to initialize
+            }
+        }
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            version: ConfVer::from_str(env!("CARGO_PKG_VERSION")),
+            vsync: false,
+            grid_opacity: 8,
+            music_volume: 50.,
+            window_mode: WindowModeForConf::Windowed,
+            handling: Handling::default(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -45,7 +103,6 @@ pub enum ConfVer {
 
 impl ConfVer {
     /// Get the `ConfVer` from a string.
-    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
             "v0.1.0" => ConfVer::V0_1_0,
@@ -103,57 +160,22 @@ impl WindowModeForConf {
     }
 }
 
-impl Config {
-    /// Load from config.json
-    pub fn load() -> Self {
-        match File::open("config.json") {
-            Ok(f) => {
-                match from_reader(f) {
-                    Ok(config) => {
-                        // info!("Loaded config.json");
-                        config
-                    }
-                    Err(why) => {
-                        warn!("Failed to parse config.json: {}", why);
-                        default() // TODO: impl ask to initialize
-                    }
-                }
-            }
-            Err(why) => {
-                warn!("Failed to open config.json: {}", why);
-                default() // TODO: impl ask to initialize
-            }
-        }
-    }
-
-    /// Apply to config.json
-    pub fn save(&self) {
-        match OpenOptions::new()
-            .write(true)
-            .truncate(true)
-            .open("config.json")
-        {
-            Ok(mut f) => {
-                if let Err(why) = to_writer(&mut f, self) {
-                    warn!("Failed to save config.json: {}", why);
-                }
-            }
-            Err(why) => {
-                warn!("Failed to open config.json: {}", why)
-                // TODO: impl ask to initialize
-            }
-        }
-    }
+/// Control handlings
+#[derive(Serialize, Deserialize)]
+pub struct Handling {
+    /// Delay Auto Shift (Frame)
+    pub das: NonZeroU8,
+    /// Automatic Repeat Rate (Frame)
+    pub arr: u8,
 }
 
-impl Default for Config {
+impl Default for Handling {
     fn default() -> Self {
-        Self {
-            version: ConfVer::from_str(env!("CARGO_PKG_VERSION")),
-            vsync: false,
-            grid_opacity: 8,
-            music_volume: 50.,
-            window_mode: WindowModeForConf::Windowed,
+        unsafe {
+            Self {
+                das: NonZeroU8::new_unchecked(11),
+                arr: 2,
+            }
         }
     }
 }

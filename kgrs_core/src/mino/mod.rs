@@ -1,7 +1,6 @@
 use crate::board::Board;
 use bevy::{ecs::schedule::ShouldRun, prelude::*, sprite::MaterialMesh2dBundle};
-use control::MinoControlPlugin;
-use controlled::*;
+use control::*;
 use kgrs_const::color::mino_color;
 use mesh::MinoInfo;
 use rand::{thread_rng, Rng};
@@ -12,13 +11,11 @@ pub struct MinoPlugin;
 
 impl Plugin for MinoPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(set_mino_ctrl)
-            .add_plugin(MinoControlPlugin)
-            .add_system_set(
-                SystemSet::new()
-                    .with_run_criteria(is_waiting_mino)
-                    .with_system(spawn_mino),
-            );
+        app.add_plugin(MinoControlPlugin).add_system_set(
+            SystemSet::new()
+                .with_run_criteria(is_waiting_mino)
+                .with_system(spawn_mino),
+        );
     }
 }
 
@@ -90,7 +87,7 @@ fn spawn_mino(
         }
     }
 
-    println!("Current board:\n{}", board_component.data); // DEBUG
+    // println!("Current board:\n{}", board_component.data); // DEBUG
 
     mino_ctrl.nth += 1;
     mino_ctrl.is_waiting = false;
@@ -154,13 +151,13 @@ impl MinoType {
     /// If `MinoType::Garbage` was passed.
     fn axis_point(&self) -> Vec2 {
         match self {
-            Self::I => Vec2::new(0.0, 0.0),
-            Self::O => Vec2::new(0.0, 1.0),
-            Self::L => Vec2::new(-0.5, 0.5),
-            Self::J => Vec2::new(-0.5, 0.5),
-            Self::Z => Vec2::new(-0.5, 0.5),
-            Self::S => Vec2::new(-0.5, 0.5),
-            Self::T => Vec2::new(-0.5, 0.5),
+            Self::I => Vec2::new(2.0, 2.0),
+            Self::O => Vec2::new(2.0, 1.0),
+            Self::L => Vec2::new(1.5, 1.5),
+            Self::J => Vec2::new(1.5, 1.5),
+            Self::Z => Vec2::new(1.5, 1.5),
+            Self::S => Vec2::new(1.5, 1.5),
+            Self::T => Vec2::new(1.5, 1.5),
             Self::Garbage => {
                 unreachable!()
             }
@@ -208,34 +205,6 @@ enum IsMino {
     M,
     // Empty
     E,
-}
-
-mod controlled {
-    use super::*;
-
-    #[derive(Component)]
-    pub(crate) struct MinoCtrl {
-        /// nth of the mino (0-indexed)
-        pub(crate) nth: usize,
-        /// Seed for RNG.
-        pub(crate) seed: u64,
-        /// Whether waiting for the next mino.
-        pub(crate) is_waiting: bool,
-    }
-
-    impl MinoCtrl {
-        fn init() -> Self {
-            Self {
-                nth: 0,
-                seed: thread_rng().gen_range(0..1000000000),
-                is_waiting: true,
-            }
-        }
-    }
-
-    pub(crate) fn set_mino_ctrl(mut cmds: Commands) {
-        cmds.spawn(MinoCtrl::init());
-    }
 }
 
 /// Mino data for the board

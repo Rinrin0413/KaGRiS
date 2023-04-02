@@ -26,6 +26,7 @@ pub(crate) fn rand_mino(nth: usize, seed: u64) -> MinoType {
 }
 
 /// The movement direction of the mino.
+#[derive(Clone, Copy, PartialEq)]
 pub(crate) enum MoveDirection {
     Left,
     Right,
